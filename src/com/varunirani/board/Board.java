@@ -4,7 +4,6 @@ import com.varunirani.PChess;
 import com.varunirani.piece.Piece;
 import processing.core.PApplet;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class Board extends PApplet {
@@ -29,7 +28,7 @@ public class Board extends PApplet {
 				chessTiles.put(tile.getPosition(), tile);
 			}
 		}
-		String fen = "3k3r/2N2qpp/5n2/2Qnp3/1p1P4/2P3PB/4PP2/R1B2RK1 w - - 44 22";
+		String fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
 		drawPiecesFromFen(fen);
 		for (Tile tile : chessTiles.values()) {
 			tile.drawTile();
