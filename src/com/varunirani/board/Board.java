@@ -28,10 +28,18 @@ public class Board extends PApplet {
 				chessTiles.put(tile.getPosition(), tile);
 			}
 		}
-		String fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
+		String fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
 		drawPiecesFromFen(fen);
 		for (Tile tile : chessTiles.values()) {
 			tile.drawTile();
+			int mouseX = PChess._mouseX;
+			int mouseY = PChess._mouseY;
+			int tileSize = Board.TILE_SIZE;
+			if (mouseX > tile.getX() && mouseX < tile.getX() + tileSize &&
+					mouseY > tile.getY() && mouseY < tile.getY() + tileSize) {
+				fill(0, 50);
+				square(tile.getX(), tile.getY(), Board.TILE_SIZE);
+			}
 //			System.out.println(tile.getPosition() + " " + Arrays.toString(tile.getCurrentPiece()));
 			if (tile.getFile() == NUM_FILES - 1) {
 				tile.drawRankCoords(tile.getX() + TILE_SIZE - PChess.FONT_SIZE, tile.getY() + (3 * PChess.FONT_SIZE) / 2);

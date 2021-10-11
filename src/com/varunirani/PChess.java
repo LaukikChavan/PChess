@@ -8,6 +8,8 @@ import processing.core.PSurface;
 
 public class PChess extends PApplet {
 	public static PFont font;
+	public static int _mouseX;
+	public static int _mouseY;
 	private Board board;
 	public static PGraphics g;
 	public static PSurface surface;
@@ -16,8 +18,8 @@ public class PChess extends PApplet {
 
 	@Override
 	public void settings() {
-		super.settings();
-		fullScreen();
+		pixelDensity(2);
+		size(850, 850);
 	}
 
 	@Override
@@ -32,8 +34,9 @@ public class PChess extends PApplet {
 
 	@Override
 	public void draw() {
-		super.draw();
 		background(38, 39, 48);
+		_mouseX = mouseX;
+		_mouseY = mouseY;
 		board.drawBoard();
 	}
 

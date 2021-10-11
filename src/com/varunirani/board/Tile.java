@@ -3,7 +3,7 @@ package com.varunirani.board;
 import com.varunirani.PChess;
 import com.varunirani.piece.Piece;
 import processing.core.PApplet;
-import processing.core.PShape;
+import processing.core.PImage;
 
 import java.awt.*;
 
@@ -36,8 +36,8 @@ public class Tile extends PApplet {
 	}
 
 	private String getImagePath() {
-		String path = "assets/pieces/";
-		String fileExt = ".svg";
+		String path = "assets/pieces_png/";
+		String fileExt = ".png";
 		String fileName = "";
 		Piece pieceColor = currentPiece[0];
 		Piece pieceType = currentPiece[1];
@@ -63,8 +63,8 @@ public class Tile extends PApplet {
 		fill(squareColor.getRGB());
 		square(x, y, Board.TILE_SIZE);
 		if (currentPiece[1] != Piece.None) {
-			PShape pieceImage = loadShape(getImagePath());
-			shape(pieceImage, x, y, Board.TILE_SIZE, Board.TILE_SIZE);
+			PImage pieceImage = loadImage(getImagePath());
+			image(pieceImage, x, y, Board.TILE_SIZE, Board.TILE_SIZE);
 		}
 	}
 
@@ -99,4 +99,5 @@ public class Tile extends PApplet {
 	public void setCurrentPiece(Piece[] currentPiece) {
 		this.currentPiece = currentPiece;
 	}
+
 }
