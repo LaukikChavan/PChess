@@ -2,23 +2,22 @@ package com.varunirani.board;
 
 import com.varunirani.PChess;
 import com.varunirani.piece.Piece;
-import processing.core.PApplet;
 
 import java.util.HashMap;
 
-public class Board extends PApplet {
+public class Board extends PChess {
 	private static final int NUM_RANKS = 8, NUM_FILES = 8;
 	public static int TILE_SIZE;
 	public static HashMap<String, Tile> chessTiles = new HashMap<>();
+	HashMap<Character, Piece> pieceFromTypeSymbol;
+	public static Tile tileCopy, previousTile;
 
 	public Board() {
-		TILE_SIZE = PChess.s_height / NUM_RANKS;
-	}
-
-	public void drawBoard() {
-		g = PChess.g;
-		int startX = PChess.s_width / 2 - 4 * TILE_SIZE;
-		int startY = PChess.s_height - TILE_SIZE;
+		this.g = _g;
+		this.surface = _surface;
+		TILE_SIZE = _height / NUM_RANKS;
+		int startX = _width / 2 - 4 * TILE_SIZE;
+		int startY = _height - TILE_SIZE;
 		for (int rank = 0; rank < NUM_RANKS; rank++) {
 			for (int file = 0; file < NUM_FILES; file++) {
 				boolean isLightSquare = (rank + file) % 2 != 0;
@@ -28,25 +27,33 @@ public class Board extends PApplet {
 				chessTiles.put(tile.getPosition(), tile);
 			}
 		}
-		String fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
-		drawPiecesFromFen(fen);
-		for (Tile tile : chessTiles.values()) {
-			tile.drawTile();
-			int mouseX = PChess._mouseX;
-			int mouseY = PChess._mouseY;
-			int tileSize = Board.TILE_SIZE;
-			if (mouseX > tile.getX() && mouseX < tile.getX() + tileSize &&
-					mouseY > tile.getY() && mouseY < tile.getY() + tileSize) {
-				fill(0, 50);
-				square(tile.getX(), tile.getY(), Board.TILE_SIZE);
+		pieceFromTypeSymbol = new HashMap<>() {
+			{
+				put('k', Piece.King);
+				put('p', Piece.Pawn);
+				put('n', Piece.Knight);
+				put('b', Piece.Bishop);
+				put('r', Piece.Rook);
+				put('q', Piece.Queen);
 			}
-//			System.out.println(tile.getPosition() + " " + Arrays.toString(tile.getCurrentPiece()));
+		};
+		String fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
+		setPiecesFromFen(fen);
+	}
+
+	public void drawBoard() {
+		for (Tile tile : chessTiles.values()) {
 			if (tile.getFile() == NUM_FILES - 1) {
-				tile.drawRankCoords(tile.getX() + TILE_SIZE - PChess.FONT_SIZE, tile.getY() + (3 * PChess.FONT_SIZE) / 2);
+				tile.drawRankCoords(tile.getX() + TILE_SIZE - FONT_SIZE, tile.getY() + (3 * FONT_SIZE) / 2);
 			}
 			if (tile.getRank() == 0) {
-				tile.drawFileCoords(tile.getX() + PChess.FONT_SIZE / 2, tile.getY() + TILE_SIZE - PChess.FONT_SIZE / 2);
+				tile.drawFileCoords(tile.getX() + FONT_SIZE / 2, tile.getY() + TILE_SIZE - FONT_SIZE / 2);
 			}
+			tile.drawTile();
+			tile.checkMouseOver();
+		}
+		for (Tile tile: chessTiles.values()) {
+			tile.drawImages();
 		}
 	}
 
@@ -63,18 +70,7 @@ public class Board extends PApplet {
 	 * full move counter
 	 * */
 
-	private void drawPiecesFromFen(String fen) {
-		HashMap<Character, Piece> pieceFromTypeSymbol = new HashMap<>() {
-			{
-				put('k', Piece.King);
-				put('p', Piece.Pawn);
-				put('n', Piece.Knight);
-				put('b', Piece.Bishop);
-				put('r', Piece.Rook);
-				put('q', Piece.Queen);
-			}
-		};
-
+	private void setPiecesFromFen(String fen) {
 		String[] fenSplit = fen.split(" ");
 		String pieceArrangement = fenSplit[0];
 		String playerToMove = fenSplit[1];
