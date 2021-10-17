@@ -3,30 +3,21 @@ package com.varunirani.board;
 import com.varunirani.PChess;
 import com.varunirani.piece.Piece;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Board extends PChess {
 	private static final int NUM_RANKS = 8, NUM_FILES = 8;
 	public static int TILE_SIZE;
-	public static HashMap<String, Tile> chessTiles = new HashMap<>();
-	HashMap<Character, Piece> pieceFromTypeSymbol;
-	public static Tile tileCopy, previousTile;
+	public static Tile[] board = new Tile[64];
+	public static HashMap<Character, Integer> pieceFromTypeSymbol;
+	public static HashMap<Integer, Character> symbolFromPieceType;
+
 
 	public Board() {
 		this.g = _g;
 		this.surface = _surface;
 		TILE_SIZE = _height / NUM_RANKS;
-		int startX = _width / 2 - 4 * TILE_SIZE;
-		int startY = _height - TILE_SIZE;
-		for (int rank = 0; rank < NUM_RANKS; rank++) {
-			for (int file = 0; file < NUM_FILES; file++) {
-				boolean isLightSquare = (rank + file) % 2 != 0;
-				int x = startX + TILE_SIZE * file;
-				int y = startY - TILE_SIZE * rank;
-				Tile tile = new Tile(rank, file, x, y, isLightSquare);
-				chessTiles.put(tile.getPosition(), tile);
-			}
-		}
 		pieceFromTypeSymbol = new HashMap<>() {
 			{
 				put('k', Piece.King);
@@ -37,23 +28,29 @@ public class Board extends PChess {
 				put('q', Piece.Queen);
 			}
 		};
+		symbolFromPieceType = new HashMap<>() {
+			{
+				put(Piece.King, 'k');
+				put(Piece.Pawn, 'p');
+				put(Piece.Knight, 'n');
+				put(Piece.Bishop, 'b');
+				put(Piece.Rook, 'r');
+				put(Piece.Queen, 'q');
+			}
+		};
 		String fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
 		setPiecesFromFen(fen);
 	}
 
 	public void drawBoard() {
-		for (Tile tile : chessTiles.values()) {
-			if (tile.getFile() == NUM_FILES - 1) {
-				tile.drawRankCoords(tile.getX() + TILE_SIZE - FONT_SIZE, tile.getY() + (3 * FONT_SIZE) / 2);
-			}
-			if (tile.getRank() == 0) {
-				tile.drawFileCoords(tile.getX() + FONT_SIZE / 2, tile.getY() + TILE_SIZE - FONT_SIZE / 2);
-			}
+		for (Tile tile : board) {
 			tile.drawTile();
-			tile.checkMouseOver();
 		}
-		for (Tile tile: chessTiles.values()) {
+		for (Tile tile : board) {
 			tile.drawImages();
+		}
+		for (Tile tile : board) {
+			tile.checkMouseOver();
 		}
 	}
 
@@ -71,6 +68,8 @@ public class Board extends PChess {
 	 * */
 
 	private void setPiecesFromFen(String fen) {
+		int startX = _width / 2 - 4 * TILE_SIZE;
+		int startY = 0;
 		String[] fenSplit = fen.split(" ");
 		String pieceArrangement = fenSplit[0];
 		String playerToMove = fenSplit[1];
@@ -82,16 +81,23 @@ public class Board extends PChess {
 		int file = 0, rank = NUM_RANKS - 1;
 
 		for (char symbol : pieceArrangement.toCharArray()) {
+			int x = startX + file * TILE_SIZE; // correct
+			int y = startY + TILE_SIZE * (NUM_RANKS - rank % 8 - 1);
 			if (symbol == '/') {
 				file = 0;
 				rank--;
 			} else {
 				if (Character.isDigit(symbol)) {
-					file += Integer.parseInt(Character.toString(symbol));
+					for (int i = 0; i < Integer.parseInt(Character.toString(symbol)); i++) {
+						x = startX + file * TILE_SIZE;
+						y = startY + TILE_SIZE * (NUM_RANKS - rank % 8 - 1);
+						board[rank * NUM_RANKS + file] = new Tile(rank, file, x, y, Piece.None);
+						file++;
+					}
 				} else {
-					Piece pieceColor = Character.isUpperCase(symbol) ? Piece.White : Piece.Black;
-					Piece pieceType = pieceFromTypeSymbol.get(Character.toLowerCase(symbol));
-					chessTiles.get((char) (file + 97) + "" + (rank + 1)).setCurrentPiece(new Piece[]{pieceColor, pieceType});
+					int pieceColor = Character.isUpperCase(symbol) ? Piece.White : Piece.Black;
+					int pieceType = pieceFromTypeSymbol.get(Character.toLowerCase(symbol));
+					board[rank * NUM_RANKS + file] = new Tile(rank, file, x, y, pieceColor | pieceType);
 					file++;
 				}
 			}
