@@ -14,6 +14,7 @@ public class PChess extends PApplet {
 	protected static PGraphics _g;
 	protected static PSurface _surface;
 	protected static int _height, _width, _mouseX, _mouseY;
+	protected static boolean _mousePressed;
 
 	@Override
 	public void settings() {
@@ -36,13 +37,42 @@ public class PChess extends PApplet {
 		background(38, 39, 48);
 		_mouseX = mouseX;
 		_mouseY = mouseY;
+		_mousePressed = mousePressed;
 		board.drawBoard();
 	}
 
 	@Override
-	public void mouseClicked() {
-		for (Tile tile: Board.board) {
-			tile.mouseClicked();
+	public void mousePressed() {
+		for (Tile tile : Board.board) {
+			if (tile.overTile) {
+				if (Board.previousTile != null)
+					Board.previousTile.squareColor = Board.previousTileCopy.squareColor;
+				if (Board.targetTile != null)
+					Board.targetTile.squareColor = Board.targetTileCopy.squareColor;
+				Board.previousTile = tile;
+				Board.previousTileCopy = tile.clone();
+				tile.mousePressed();
+			}
+		}
+	}
+
+	@Override
+	public void mouseDragged() {
+		for (Tile tile : Board.board) {
+			if (tile.isPressed) {
+				tile.mouseDragged();
+			}
+		}
+	}
+
+	@Override
+	public void mouseReleased() {
+		for (Tile tile : Board.board) {
+			if (tile.overTile) {
+				Board.targetTile = tile;
+				Board.targetTileCopy = tile.clone();
+				tile.mouseReleased();
+			}
 		}
 	}
 
