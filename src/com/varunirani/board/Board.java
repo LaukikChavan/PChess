@@ -3,7 +3,6 @@ package com.varunirani.board;
 import com.varunirani.PChess;
 import com.varunirani.piece.Piece;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class Board extends PChess {
@@ -12,7 +11,8 @@ public class Board extends PChess {
 	public static Tile[] board = new Tile[64];
 	public static HashMap<Character, Integer> pieceFromTypeSymbol;
 	public static HashMap<Integer, Character> symbolFromPieceType;
-
+	public static Tile previousTile, previousTileCopy, targetTile, targetTileCopy;
+	public static int colorToPlay;
 
 	public Board() {
 		this.g = _g;
@@ -73,6 +73,10 @@ public class Board extends PChess {
 		String[] fenSplit = fen.split(" ");
 		String pieceArrangement = fenSplit[0];
 		String playerToMove = fenSplit[1];
+		if (playerToMove.equals("w"))
+			colorToPlay = Piece.White;
+		else
+			colorToPlay = Piece.Black;
 		String castlingRights = fenSplit[2];
 		String enPassantTarget = fenSplit[3];
 		int halfMoveCount = Integer.parseInt(fenSplit[4]);

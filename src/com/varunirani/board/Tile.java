@@ -14,18 +14,23 @@ public class Tile extends PChess implements Cloneable {
 	private final String position;
 	private final Color lightColor = new Color(239, 240, 209);
 	private final Color darkColor = new Color(75, 142, 109);
+	public Color squareColor;
 	private int currentPiece;
 	PImage pieceImage;
-	private boolean overTile;
+	public boolean overTile, isPressed;
+	private int xOffset, yOffset;
+	private int imageX, imageY;
 
 	public Tile(int rank, int file, int x, int y, int currentPiece) {
 		this.g = _g;
 		this.surface = _surface;
 		this.rank = rank;
 		this.file = file;
-		this.x = x;
-		this.y = y;
+		this.x = this.imageX = x;
+		this.y = this.imageY = y;
 		this.currentPiece = currentPiece;
+		this.squareColor = (rank + file) % 2 != 0 ? lightColor : darkColor;
+
 		if (currentPiece != Piece.None) {
 			pieceImage = loadImage(getImagePath());
 		} else {
@@ -61,7 +66,6 @@ public class Tile extends PChess implements Cloneable {
 	}
 
 	public void drawTile() {
-		Color squareColor = (rank + file) % 2 != 0 ? lightColor : darkColor;
 		noStroke();
 		fill(squareColor.getRGB());
 		square(x, y, Board.TILE_SIZE);
@@ -69,7 +73,7 @@ public class Tile extends PChess implements Cloneable {
 
 	public void drawImages() {
 		if (currentPiece != Piece.None && pieceImage != null) {
-			image(pieceImage, x, y, Board.TILE_SIZE, Board.TILE_SIZE);
+			image(pieceImage, imageX, imageY, Board.TILE_SIZE, Board.TILE_SIZE);
 		}
 	}
 
@@ -102,20 +106,57 @@ public class Tile extends PChess implements Cloneable {
 	}
 
 	public void checkMouseOver() {
-		int mouseX = PChess._mouseX;
-		int mouseY = PChess._mouseY;
-		overTile = mouseX > x && mouseX < x + Board.TILE_SIZE &&
-				mouseY > y && mouseY < y + Board.TILE_SIZE;
+		overTile = _mouseX > x && _mouseX < x + Board.TILE_SIZE &&
+				_mouseY > y && _mouseY < y + Board.TILE_SIZE;
 
 		if (overTile) {
-			fill(0, 50);
-			square(x, y, Board.TILE_SIZE);
+			if (currentPiece != Piece.None) {
+				cursor(HAND);
+			} else {
+				cursor(ARROW);
+			}
 		}
 	}
 
 	@Override
-	public void mouseClicked() {
+	public void mousePressed() {
+		if (Board.previousTile.currentPiece != Piece.None) {
+			isPressed = overTile;
+			xOffset = _mouseX - x;
+			yOffset = _mouseY - y;
+			if (Board.previousTile.isPressed) {
+				Board.previousTile.squareColor = new Color(255, 188, 141);
+			}
+		}
+	}
 
+	@Override
+	public void mouseDragged() {
+		if (isPressed) {
+			imageX = _mouseX - xOffset;
+			imageY = _mouseY - yOffset;
+		}
+	}
+
+	@Override
+	public void mouseReleased() {
+		if (Board.previousTile.currentPiece != Piece.None) {
+			if (!Board.previousTile.position.equals(position)) {
+				if (Board.targetTile.overTile) {
+					Board.targetTile.squareColor = new Color(255, 206, 170);
+				}
+				Board.colorToPlay = Piece.ColorMask ^ Board.colorToPlay;
+			} else {
+				Board.previousTile.squareColor = Board.previousTileCopy.squareColor;
+			}
+			Board.previousTile.isPressed = false;
+			Board.previousTile.currentPiece = Piece.None;
+			Board.previousTile.pieceImage = null;
+			Board.previousTile.imageX = Board.previousTileCopy.imageX;
+			Board.previousTile.imageY = Board.previousTileCopy.imageY;
+			currentPiece = Board.previousTileCopy.currentPiece;
+			pieceImage = Board.previousTileCopy.pieceImage;
+		}
 	}
 
 	@Override
@@ -125,5 +166,9 @@ public class Tile extends PChess implements Cloneable {
 		} catch (CloneNotSupportedException e) {
 			throw new AssertionError();
 		}
+	}
+
+	public int getCurrentPiece() {
+		return currentPiece;
 	}
 }

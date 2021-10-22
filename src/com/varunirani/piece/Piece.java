@@ -17,6 +17,10 @@ public class Piece {
 	public static final int WhiteMask = 0b01000;
 	public static final int ColorMask = WhiteMask | BlackMask;
 
+	//     11000
+	// XOR 10000
+	//     01000
+
 	public static boolean IsColor(int piece, int colour) {
 		return (piece & ColorMask) == colour;
 	}
